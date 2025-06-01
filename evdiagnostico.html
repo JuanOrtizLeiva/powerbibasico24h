@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación Diagnóstica - Power BI Básico</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #F2C811;
+            --primary-dark: #E5B800;
+            --secondary: #333333;
+            --success: #28a745;
+            --error: #dc3545;
+            --warning: #ffc107;
+            --background: #f8f9fa;
+            --surface: #ffffff;
+            --surface-light: #f1f3f5;
+            --text: #212529;
+            --text-dim: #6c757d;
+            --border: #dee2e6;
+            --shadow: rgba(0, 0, 0, 0.08);
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 30% 20%, rgba(242, 200, 17, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(242, 200, 17, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(51, 51, 51, 0.02) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .logo-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: var(--secondary);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--secondary);
+            font-weight: 600;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .warning-notice {
+            background: rgba(242, 200, 17, 0.1);
+            border: 1px solid var(--primary);
+            border-radius: 0.5rem;
+            padding: 1rem 1.5rem;
+            margin: 0 auto 2rem;
+            max-width: 600px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: fadeIn 0.8s ease-out 0.3s both;
+        }
+
+        .warning-icon {
+            font-size: 1.25rem;
+            color: var(--primary-dark);
+        }
+
+        .warning-text {
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+
+        .progress-container {
+            background: var(--surface);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px var(--shadow);
+            border: 1px solid var(--border);
+            animation: fadeIn 0.8s ease-out 0.2s both;
+        }
+
+        .progress-bar {
+            background: var(--surface-light);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .question-card {
+            background: var(--surface);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px var(--shadow);
+            border: 1px solid var(--border);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUp 0.6s ease-out forwards;
+            display: none;
+        }
+
+        .question-card.active {
+            display: block;
+        }
+
+        .question-number {
+            color: var(--primary-dark);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            color: var(--secondary);
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .option {
+            background: var(--surface-light);
+            border: 2px solid transparent;
+            border-radius: 0.75rem;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option:hover {
+            background: var(--surface);
+            border-color: var(--primary);
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px var(--shadow);
+        }
+
+        .option.selected {
+            border-color: var(--primary);
+            background: rgba(242, 200, 17, 0.1);
+        }
+
+        .option.correct {
+            border-color: var(--success);
+            background: rgba(40, 167, 69, 0.1);
+        }
+
+        .option.incorrect {
+            border-color: var(--error);
+            background: rgba(220, 53, 69, 0.1);
+        }
+
+        .option.disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .feedback {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct {
+            background: rgba(40, 167, 69, 0.1);
+            border: 1px solid var(--success);
+            color: var(--text);
+        }
+
+        .feedback.incorrect {
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid var(--error);
+            color: var(--text);
+        }
+
+        .feedback-icon {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--secondary);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-block;
+            margin-top: 1.5rem;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(242, 200, 17, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .results {
+            background: var(--surface);
+            border-radius: 1rem;
+            padding: 3rem;
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.8s ease-out;
+            box-shadow: 0 2px 8px var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .score {
+            font-size: 4rem;
+            font-weight: 700;
+            margin: 1rem 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .score-message {
+            font-size: 1.2rem;
+            color: var(--text-dim);
+            margin-bottom: 2rem;
+        }
+
+        .recommendation {
+            background: var(--surface-light);
+            padding: 2rem;
+            border-radius: 0.75rem;
+            margin-top: 2rem;
+            text-align: left;
+            border: 1px solid var(--border);
+        }
+
+        .recommendation h3 {
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+        }
+
+        .recommendation ul {
+            color: var(--text);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .question-text {
+                font-size: 1.1rem;
+            }
+
+            .warning-notice {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-pattern"></div>
+    
+    <div class="container">
+        <div class="header">
+            <div class="logo-container">
+                <div class="logo">PBI</div>
+            </div>
+            <h1>Evaluación Diagnóstica</h1>
+            <p class="subtitle">Power BI - Nivel Básico</p>
+        </div>
+
+        <div class="warning-notice">
+            <span class="warning-icon">ℹ️</span>
+            <span class="warning-text">
+                <strong>Nota:</strong> Esta evaluación es únicamente de referencia personal. 
+                Los resultados no se guardan ni se registran. Es una herramienta para que identifiques tu nivel actual.
+            </span>
+        </div>
+
+        <div class="progress-container">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span>Progreso</span>
+                <span id="progress-text">0 de 12 preguntas</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+        </div>
+
+        <div id="quiz-container">
+            <!-- Las preguntas se generarán dinámicamente -->
+        </div>
+
+        <div class="results" id="results">
+            <h2>¡Evaluación Completada!</h2>
+            <div class="score" id="score">0%</div>
+            <p class="score-message" id="score-message"></p>
+            <div class="recommendation" id="recommendation"></div>
+            <button class="btn" onclick="restart()">Realizar Nueva Evaluación</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "¿Qué es Power BI?",
+                options: [
+                    "Un lenguaje de programación de Microsoft",
+                    "Una herramienta de inteligencia de negocios para análisis y visualización de datos",
+                    "Una base de datos relacional",
+                    "Un sistema operativo para análisis"
+                ],
+                correct: 1,
+                feedback: {
+                    correct: "¡Exacto! Power BI es la plataforma de Business Intelligence de Microsoft que permite conectar, transformar, visualizar y compartir datos de manera interactiva.",
+                    incorrect: "Power BI es una herramienta de inteligencia de negocios (BI) que te permite crear visualizaciones interactivas y compartir insights de tus datos."
+                }
+            },
+            {
+                question: "¿Cuáles son los componentes principales de Power BI?",
+                options: [
+                    "Excel, Word y PowerPoint",
+                    "Power BI Desktop, Power BI Service y Power BI Mobile",
+                    "SQL Server, Azure y Office 365",
+                    "Power Query, Power Pivot y Power View"
+                ],
+                correct: 1,
+                feedback: {
+                    correct: "¡Correcto! Power BI Desktop es para crear reportes, Power BI Service para compartirlos en la nube, y Power BI Mobile para acceder desde dispositivos móviles.",
+                    incorrect: "Los componentes principales son: Power BI Desktop (desarrollo), Power BI Service (compartir en la nube) y Power BI Mobile (acceso móvil)."
+                }
+            },
+            {
+                question: "¿En qué pestaña de Power BI Desktop se encuentra Power Query Editor?",
+                options: [
+                    "Archivo",
+                    "Insertar",
+                    "Inicio (Transformar datos)",
+                    "Vista"
+                ],
+                correct: 2,
+                feedback: {
+                    correct: "¡Muy bien! En la pestaña Inicio encontrarás el botón 'Transformar datos' que abre Power Query Editor para limpiar y transformar tus datos.",
+                    incorrect: "Power Query Editor se accede desde la pestaña Inicio, haciendo clic en 'Transformar datos'. Es donde preparas y limpias tus datos antes de visualizarlos."
+                }
+            },
+            {
+                question: "¿Qué lenguaje se utiliza para crear medidas en Power BI?",
+                options: [
+                    "SQL",
+                    "Python",
+                    "DAX (Data Analysis Expressions)",
+                    "M (Power Query)"
+                ],
+                correct: 2,
+                feedback: {
+                    correct: "¡Excelente! DAX es el lenguaje de fórmulas para crear medidas y columnas calculadas en Power BI, similar a las fórmulas de Excel pero más potente.",
+                    incorrect: "DAX (Data Analysis Expressions) es el lenguaje para crear medidas y cálculos en Power BI. Es similar a Excel pero diseñado para trabajar con modelos de datos."
+                }
+            },
+            {
+                question: "¿Cuál es la diferencia principal entre una medida y una columna calculada?",
+                options: [
+                    "No hay diferencia, son lo mismo",
+                    "Las medidas se calculan en tiempo real, las columnas se almacenan en el modelo",
+                    "Las columnas son más rápidas que las medidas",
+                    "Las medidas solo funcionan con números"
+                ],
+                correct: 1,
+                feedback: {
+                    correct: "¡Perfecto! Las medidas se calculan dinámicamente según el contexto del filtro, mientras que las columnas calculadas se procesan al actualizar y se almacenan.",
+                    incorrect: "Las medidas se calculan dinámicamente según los filtros aplicados (no ocupan espacio), mientras que las columnas calculadas se almacenan en el modelo de datos."
+                }
+            },
+            {
+                question: "¿Qué tipo de visualización es mejor para mostrar tendencias a lo largo del tiempo?",
+                options: [
+                    "Gráfico circular (pie chart)",
+                    "Gráfico de líneas",
+                    "Tarjeta",
+                    "Tabla"
+                ],
+                correct: 1,
+                feedback: {
+                    correct: "¡Correcto! Los gráficos de líneas son ideales para mostrar tendencias y cambios a lo largo del tiempo, permitiendo identificar patrones fácilmente.",
+                    incorrect: "Los gráficos de líneas son los más efectivos para mostrar tendencias temporales, ya que permiten ver claramente cómo cambian los valores en el tiempo."
+                }
+            },
+            {
+                question: "¿Qué es un 'slicer' o segmentador en Power BI?",
+                options: [
+                    "Una herramienta para cortar datos",
+                    "Un tipo de gráfico circular",
+                    "Un filtro visual interactivo para los reportes",
+                    "Una función DAX"
+                ],
+                correct: 2,
+                feedback: {
+                    correct: "¡Muy bien! Los slicers son controles visuales que permiten a los usuarios filtrar los datos del reporte de manera interactiva y fácil.",
+                    incorrect: "Un slicer es un filtro visual que los usuarios pueden usar para filtrar interactivamente todos los visuales en una página del reporte."
+                }
+            },
+            {
+                question: "¿Cuál es el formato de archivo nativo de Power BI Desktop?",
+                options: [
+                    ".xlsx",
+                    ".pbix",
+                    ".pbi",
+                    ".dash"
+                ],
+                correct: 1,
+                feedback: {
+                    correct: "¡Exacto! Los archivos .pbix (Power BI Desktop files) contienen todo tu modelo de datos, visualizaciones y configuraciones del reporte.",
+                    incorrect: "Los archivos de Power BI Desktop se guardan con extensión .pbix, que contiene el modelo de datos completo y todas las visualizaciones."
+                }
+            },
+            {
+                question: "¿Qué tipo de relación es la más común entre tablas en un modelo de datos?",
+                options: [
+                    "Muchos a muchos",
+                    "Uno a uno",
+                    "Uno a muchos",
+                    "No se necesitan relaciones"
+                ],
+                correct: 2,
+                feedback: {
+                    correct: "¡Excelente! Las relaciones uno a muchos son las más comunes, como entre una tabla de productos (uno) y ventas (muchos).",
+                    incorrect: "Las relaciones uno a muchos son las más comunes. Por ejemplo, un cliente puede tener muchas órdenes, pero cada orden pertenece a un solo cliente."
+                }
+            },
+            {
+                question: "¿Para qué sirve la función CALCULATE en DAX?",
+                options: [
+                    "Para hacer sumas simples",
+                    "Para modificar el contexto de filtro de una expresión",
+                    "Para crear tablas",
+                    "Para importar datos"
+                ],
+                correct: 1,
+                feedback: {
+                    correct: "¡Perfecto! CALCULATE es la función más poderosa de DAX, permite modificar los filtros bajo los cuales se evalúa una expresión.",
+                    incorrect: "CALCULATE es la función más importante de DAX. Permite cambiar el contexto de filtro, por ejemplo, calcular ventas solo para un producto específico."
+                }
+            },
+            {
+                question: "¿Cuál es la mejor práctica para nombrar medidas en Power BI?",
+                options: [
+                    "Usar nombres cortos como 'V' o 'Total'",
+                    "Usar nombres descriptivos como 'Total Ventas' o 'Margen Bruto %'",
+                    "Usar códigos como 'MED001', 'MED002'",
+                    "No importa el nombre"
+                ],
+                correct: 1,
+                feedback: {
+                    correct: "¡Muy bien! Nombres descriptivos facilitan el mantenimiento y comprensión del modelo, especialmente cuando trabajas en equipo.",
+                    incorrect: "Es fundamental usar nombres descriptivos y claros. Esto facilita el trabajo en equipo y el mantenimiento futuro del modelo."
+                }
+            },
+            {
+                question: "¿Qué capacidad tiene la versión gratuita de Power BI Service?",
+                options: [
+                    "No existe versión gratuita",
+                    "Publicar y compartir con cualquier usuario",
+                    "Publicar reportes para uso personal (Mi área de trabajo)",
+                    "Todas las funcionalidades sin límites"
+                ],
+                correct: 2,
+                feedback: {
+                    correct: "¡Correcto! La versión gratuita permite publicar en 'Mi área de trabajo' para uso personal. Para compartir se necesita Power BI Pro o Premium.",
+                    incorrect: "Power BI Service tiene una versión gratuita que permite publicar reportes en tu área de trabajo personal. Para compartir con otros necesitas una licencia Pro."
+                }
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answers = [];
+
+        function init() {
+            renderQuestion();
+            updateProgress();
+        }
+
+        function renderQuestion() {
+            const container = document.getElementById('quiz-container');
+            const q = questions[currentQuestion];
+            
+            container.innerHTML = `
+                <div class="question-card active">
+                    <div class="question-number">Pregunta ${currentQuestion + 1} de ${questions.length}</div>
+                    <h2 class="question-text">${q.question}</h2>
+                    <div class="options">
+                        ${q.options.map((option, index) => `
+                            <div class="option" onclick="selectOption(${index})">
+                                ${option}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="feedback" id="feedback"></div>
+                    <button class="btn" id="next-btn" style="display: none;" onclick="nextQuestion()">
+                        ${currentQuestion === questions.length - 1 ? 'Ver Resultados' : 'Siguiente Pregunta'}
+                    </button>
+                </div>
+            `;
+        }
+
+        function selectOption(index) {
+            const options = document.querySelectorAll('.option');
+            const feedback = document.getElementById('feedback');
+            const nextBtn = document.getElementById('next-btn');
+            const q = questions[currentQuestion];
+            
+            // Deshabilitar todas las opciones
+            options.forEach(opt => opt.classList.add('disabled'));
+            
+            // Marcar la opción seleccionada
+            options[index].classList.add('selected');
+            
+            // Verificar respuesta
+            const isCorrect = index === q.correct;
+            answers.push(isCorrect);
+            
+            if (isCorrect) {
+                options[index].classList.add('correct');
+                feedback.classList.add('correct', 'show');
+                feedback.innerHTML = `
+                    <span class="feedback-icon">✓</span>
+                    ${q.feedback.correct}
+                `;
+                score++;
+            } else {
+                options[index].classList.add('incorrect');
+                options[q.correct].classList.add('correct');
+                feedback.classList.add('incorrect', 'show');
+                feedback.innerHTML = `
+                    <span class="feedback-icon">✗</span>
+                    ${q.feedback.incorrect}
+                `;
+            }
+            
+            nextBtn.style.display = 'inline-block';
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            updateProgress();
+            
+            if (currentQuestion < questions.length) {
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function updateProgress() {
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+            
+            const progress = (currentQuestion / questions.length) * 100;
+            progressFill.style.width = progress + '%';
+            progressText.textContent = `${currentQuestion} de ${questions.length} preguntas`;
+        }
+
+        function showResults() {
+            const quizContainer = document.getElementById('quiz-container');
+            const resultsContainer = document.getElementById('results');
+            const scoreElement = document.getElementById('score');
+            const messageElement = document.getElementById('score-message');
+            const recommendationElement = document.getElementById('recommendation');
+            
+            quizContainer.style.display = 'none';
+            resultsContainer.classList.add('show');
+            
+            const percentage = Math.round((score / questions.length) * 100);
+            scoreElement.textContent = percentage + '%';
+            
+            let message, recommendation;
+            
+            if (percentage >= 80) {
+                message = "¡Excelente! Tienes una base sólida en Power BI.";
+                recommendation = `
+                    <h3>Recomendación para tu nivel</h3>
+                    <p>Tu conocimiento de Power BI es muy bueno. El curso te ayudará a:</p>
+                    <ul style="margin-top: 1rem; padding-left: 1.5rem;">
+                        <li>Dominar funciones DAX avanzadas</li>
+                        <li>Optimizar el rendimiento de tus modelos</li>
+                        <li>Crear visualizaciones más complejas e interactivas</li>
+                        <li>Implementar mejores prácticas empresariales</li>
+                    </ul>
+                `;
+            } else if (percentage >= 60) {
+                message = "¡Bien! Tienes conocimientos básicos que podemos expandir.";
+                recommendation = `
+                    <h3>Recomendación para tu nivel</h3>
+                    <p>Tienes una buena base inicial. El curso te permitirá:</p>
+                    <ul style="margin-top: 1rem; padding-left: 1.5rem;">
+                        <li>Consolidar conceptos fundamentales de modelado</li>
+                        <li>Aprender DAX desde lo básico hasta intermedio</li>
+                        <li>Crear dashboards profesionales paso a paso</li>
+                        <li>Conectar y transformar datos de múltiples fuentes</li>
+                    </ul>
+                `;
+            } else if (percentage >= 40) {
+                message = "Tienes nociones básicas. ¡Es un buen comienzo!";
+                recommendation = `
+                    <h3>Recomendación para tu nivel</h3>
+                    <p>El curso está diseñado perfectamente para fortalecer tus conocimientos. Aprenderás:</p>
+                    <ul style="margin-top: 1rem; padding-left: 1.5rem;">
+                        <li>Navegación completa por Power BI Desktop</li>
+                        <li>Cómo conectar y preparar tus datos</li>
+                        <li>Crear tus primeras visualizaciones efectivas</li>
+                        <li>Fundamentos de DAX con ejemplos prácticos</li>
+                    </ul>
+                `;
+            } else {
+                message = "¡No te preocupes! Todos empezamos desde cero.";
+                recommendation = `
+                    <h3>Recomendación para tu nivel</h3>
+                    <p>Este curso es ideal para principiantes absolutos. Te enseñaremos:</p>
+                    <ul style="margin-top: 1rem; padding-left: 1.5rem;">
+                        <li>Qué es Power BI y cómo puede transformar tus datos</li>
+                        <li>Instalación y configuración paso a paso</li>
+                        <li>Tu primer reporte desde cero</li>
+                        <li>Conceptos básicos explicados de forma simple</li>
+                    </ul>
+                    <p style="margin-top: 1rem;"><strong>¡El curso está diseñado especialmente para personas sin experiencia previa en Power BI!</strong></p>
+                `;
+            }
+            
+            messageElement.textContent = message;
+            recommendationElement.innerHTML = recommendation;
+            
+            // Actualizar progreso final
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+            progressFill.style.width = '100%';
+            progressText.textContent = `${questions.length} de ${questions.length} preguntas`;
+        }
+
+        function restart() {
+            currentQuestion = 0;
+            score = 0;
+            answers = [];
+            
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('quiz-container').style.display = 'block';
+            
+            init();
+        }
+
+        // Inicializar al cargar la página
+        init();
+    </script>
+</body>
+</html>
